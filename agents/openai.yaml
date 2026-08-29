@@ -1,0 +1,7 @@
+interface:
+  display_name: "Are You Sure?"
+  short_description: "Challenge a proposed engineering solution before adopting it."
+  default_prompt: "Use $are-you-sure to challenge your most recent technical recommendation."
+
+policy:
+  allow_implicit_invocation: false

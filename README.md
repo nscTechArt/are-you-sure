@@ -20,6 +20,42 @@ This skill challenges that plan across:
 
 It treats the proposal as a hypothesis to falsify, then returns an evidence-backed decision — including *keep it* when the plan survives.
 
+## How it differs from related projects
+
+`Are You Sure?` overlaps with projects that reduce agent over-engineering, but it operates at a different layer of the workflow.
+
+| Project | Core question | Main intervention point | Primary output |
+| --- | --- | --- | --- |
+| **Are You Sure?** | **Should this solution be adopted?** | After a concrete proposal exists, before implementation | Evidence-backed Decision and revised recommendation |
+| [**Ponytail**](https://github.com/DietrichGebert/ponytail) | **Given the task, what is the smallest correct implementation?** | During task understanding and implementation | Smaller implementation, diff, and dependency surface |
+| [**Karpathy Guidelines**](https://github.com/multica-ai/andrej-karpathy-skills) | **How should the coding agent behave while working?** | Throughout coding, editing, and verification | More cautious, simple, surgical, and verifiable execution behavior |
+
+### Compared with Ponytail
+
+Ponytail is primarily about **implementation minimization**. After understanding the problem, it prefers existing code, the standard library, native platform capabilities, and already-installed dependencies before writing the minimum custom code. It can also challenge unnecessary requirements or abstractions through YAGNI, but its main objective is to make the **implementation itself smaller and more direct**.
+
+`Are You Sure?` is primarily about **solution evaluation**. It does not optimize for the shortest code path. Before a Candidate solution is adopted, it independently asks whether the proposal is effective, whether its complexity is justified, and what consequences adoption would create. A complex proposal can legitimately receive **Retain** when the evidence supports it.
+
+In short:
+
+> **Ponytail asks: what is the simplest way to implement this?**  
+> **Are You Sure? asks: should we adopt this solution at all?**
+
+Their simplicity reasoning can overlap, but the role is different: Ponytail uses lower-complexity options to **guide implementation**; `Are You Sure?` uses them as baselines to **challenge the proposal**.
+
+### Compared with Karpathy Guidelines
+
+Karpathy Guidelines is a set of **behavioral guidelines** that applies throughout coding work. Its main principles are to surface assumptions and ambiguity before coding, prefer simplicity, make surgical changes, and drive execution with verifiable success criteria. Its goal is to reduce common LLM coding mistakes across the whole path from task understanding to verification.
+
+`Are You Sure?` is a narrower, explicit **independent second-pass review**. It requires a complete, concrete Candidate solution, treats that solution as a hypothesis to falsify, evaluates it across Effectiveness, Simplicity, and Consequences, and returns one explicit **Retain / Simplify / Modify / Replace / Reject / Defer** decision.
+
+In short:
+
+> **Karpathy Guidelines asks: how should a coding agent work?**  
+> **Are You Sure? asks: should this specific solution be adopted?**
+
+The two are therefore complementary: Karpathy Guidelines can improve how a solution is proposed and executed; `Are You Sure?` inserts a dedicated **dissenting second pass between proposal and implementation**.
+
 ## Install
 
 **Option A: Ask your agent (recommended)**

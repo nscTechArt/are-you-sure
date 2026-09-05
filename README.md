@@ -6,19 +6,28 @@ English | [简体中文](./README.zh.md)
 
 ## The problem
 
-Coding agents often hand you a concrete plan and keep going. They make assumptions without checking, overbuild when a smaller fix would do, and sometimes change unrelated code as a side effect — without a dissenting second pass before you adopt the idea.
+Coding agents often move from a concrete recommendation directly into implementation. The recommendation may rely on unchecked assumptions, add unnecessary machinery, or create lifecycle costs that were never compared with a simpler baseline. `Are You Sure?` inserts a dissenting second pass before adoption.
 
 ## The three dimensions
 
-This skill challenges that plan across:
-
 | Dimension | What it asks |
 | --- | --- |
-| **Effectiveness** | Does this actually achieve the stated goal under the hard constraints? |
-| **Simplicity** | Is the added complexity necessary versus the strongest credible lower-complexity baseline? |
-| **Consequences** | What material new liabilities would adoption create (regressions, lifecycle cost)? |
+| **Effectiveness** | Does the proposal actually achieve the stated goal under the hard constraints? |
+| **Simplicity** | Is its added complexity necessary versus the strongest credible lower-complexity baseline? |
+| **Consequences** | What material new liabilities would adoption create? |
 
-It treats the proposal as a hypothesis to falsify, then returns an evidence-backed decision — including *keep it* when the plan survives.
+The skill treats the proposal as a hypothesis to falsify, gathers the smallest evidence likely to change the outcome, and returns one evidence-backed Decision: **Retain / Simplify / Modify / Replace / Reject / Defer**.
+
+## Review behavior
+
+The review is designed to complete useful work before asking the user for more input.
+
+- It infers the intended Candidate solution from the conversation instead of asking merely because multiple alternatives were mentioned.
+- It inspects available code, call sites, tests, configuration, and documentation before treating a gap as blocking.
+- It asks only when the remaining uncertainty is material and plausible answers would change the Decision.
+- It uses the smallest bounded verification appropriate to the proposal; safe local read-only checks do not require an extra approval step.
+- It keeps the Challenge semantically read-only by default. If the user explicitly asks for review followed by implementation, the review and Decision come first, then the authorized implementation can continue as a separate phase.
+- Explicit user instructions take precedence over skill guidelines.
 
 ## How it differs from related projects
 
@@ -32,35 +41,25 @@ It treats the proposal as a hypothesis to falsify, then returns an evidence-back
 
 ### Compared with Ponytail
 
-Ponytail is primarily about **implementation minimization**. After understanding the problem, it prefers existing code, the standard library, native platform capabilities, and already-installed dependencies before writing the minimum custom code. It can also challenge unnecessary requirements or abstractions through YAGNI, but its main objective is to make the **implementation itself smaller and more direct**.
+Ponytail is primarily about **implementation minimization**. It prefers existing code, the standard library, native platform capabilities, and already-installed dependencies before writing the minimum custom code.
 
-`Are You Sure?` is primarily about **solution evaluation**. It does not optimize for the shortest code path. Before a Candidate solution is adopted, it independently asks whether the proposal is effective, whether its complexity is justified, and what consequences adoption would create. A complex proposal can legitimately receive **Retain** when the evidence supports it.
-
-In short:
+`Are You Sure?` is about **solution evaluation**. It asks whether a specific Candidate solution is effective, whether its complexity is justified, and what consequences adoption would create. A complex proposal can legitimately receive **Retain** when the evidence supports it.
 
 > **Ponytail asks: what is the simplest way to implement this?**  
 > **Are You Sure? asks: should we adopt this solution at all?**
 
-Their simplicity reasoning can overlap, but the role is different: Ponytail uses lower-complexity options to **guide implementation**; `Are You Sure?` uses them as baselines to **challenge the proposal**.
-
 ### Compared with Karpathy Guidelines
 
-Karpathy Guidelines is a set of **behavioral guidelines** that applies throughout coding work. Its main principles are to surface assumptions and ambiguity before coding, prefer simplicity, make surgical changes, and drive execution with verifiable success criteria. Its goal is to reduce common LLM coding mistakes across the whole path from task understanding to verification.
-
-`Are You Sure?` is a narrower, explicit **independent second-pass review**. It requires a complete, concrete Candidate solution, treats that solution as a hypothesis to falsify, evaluates it across Effectiveness, Simplicity, and Consequences, and returns one explicit **Retain / Simplify / Modify / Replace / Reject / Defer** decision.
-
-In short:
+Karpathy Guidelines is a set of behavioral principles that applies throughout coding work. `Are You Sure?` is a narrower, explicit second-pass review after a concrete proposal exists.
 
 > **Karpathy Guidelines asks: how should a coding agent work?**  
 > **Are You Sure? asks: should this specific solution be adopted?**
 
-The two are therefore complementary: Karpathy Guidelines can improve how a solution is proposed and executed; `Are You Sure?` inserts a dedicated **dissenting second pass between proposal and implementation**.
+The two are complementary: one guides execution behavior; the other independently challenges the proposed solution before adoption.
 
 ## Install
 
 **Option A: Ask your agent (recommended)**
-
-Tell your coding agent something like:
 
 ```text
 Install the are-you-sure skill from https://github.com/nscTechArt/are-you-sure
@@ -74,9 +73,9 @@ npx skills add nscTechArt/are-you-sure
 
 **Option C: Manual copy**
 
-Clone or download this repo, then copy it into your agent's skills directory (for example `~/.agents/skills/are-you-sure`, `~/.claude/skills/are-you-sure`, or `.cursor/skills/are-you-sure`, depending on the tool). The skill entrypoint is `SKILL.md`.
+Clone or download this repository and copy it into your agent's skills directory, for example `~/.agents/skills/are-you-sure`, `~/.claude/skills/are-you-sure`, or `.cursor/skills/are-you-sure`. The entrypoint is `SKILL.md`.
 
-After install, start a **new** agent task so the skill directory reloads.
+After installation, start a new agent task so the skill directory reloads.
 
 ## Usage
 
@@ -90,33 +89,40 @@ Use $are-you-sure to challenge your most recent technical recommendation.
 Before we implement that plan, run are-you-sure on it.
 ```
 
+```text
+Run are-you-sure on that plan, then implement the revised recommendation.
+```
+
 ### When to use it
 
-- The agent has given a **concrete** plan that claims to solve the goal — not loose brainstorming
-- The work is **software engineering or technical-project** scoped
-- You want a second pass **before** adopting or implementing
+- The agent has produced a concrete solution that claims to solve the goal.
+- The work is software-engineering or technical-project scoped.
+- You want an independent challenge before adoption or implementation.
 
 ### When not to use it
 
-- There is no concrete proposal yet — only exploration or unselected alternatives
-- The question is outside software / technical-project work
-- You only want execution, not a challenge
-- You need the agent to **implement** changes in the same pass (this skill stays read-only on purpose)
+- There is no concrete proposal yet and you only want open-ended exploration.
+- The work is outside software engineering or technical-project scope.
+- You only want execution and do not want the solution challenged.
 
 ### What you get back
 
-A self-contained recommendation in this shape:
+1. **Decision** — Retain, Simplify, Modify, Replace, Reject, or Defer.
+2. **Effectiveness / Simplicity / Consequences** — concise findings tied to decisive evidence.
+3. **Revised recommendation** — the self-contained recommendation that remains after the challenge.
 
-1. **Decision** — one of: Retain, Simplify, Modify, Replace, Reject, Defer
-2. **Effectiveness / Simplicity / Consequences** — findings with decisive evidence for each dimension
-3. **Revised recommendation** — what to adopt next, without implementing it
+A **Defer** result is reserved for a named uncertainty that could actually change the outcome after available evidence has been exhausted; it is not the default response to routine ambiguity.
 
-## How to know it's working
+## How to know it is working
 
-- You get an explicit **Decision**, including Retain when the plan survives
-- Each dimension has a finding tied to **evidence**, not vibes
-- It **pushes back** (Simplify / Modify / Replace / Reject) when warranted — not only agreement
-- It **stops at the recommendation** and does not start implementing
+- A clear Candidate is reviewed without unnecessary clarification.
+- Each decision-changing claim is tied to project evidence or marked as an explicit uncertainty.
+- A credible lower-complexity baseline is considered rather than invented for the sake of comparison.
+- The skill can return **Retain** when the proposal survives, and pushes back with **Simplify / Modify / Replace / Reject** when evidence warrants it.
+- Verification stays proportional to the decision instead of expanding automatically.
+- The final response is concise by default and does not repeat the same finding across dimensions.
+
+Behavioral regression cases are documented in [`evals/behavior.md`](./evals/behavior.md).
 
 ## License
 

@@ -12,7 +12,7 @@ Something is **material** when it could change the Decision.
 
 ## Operating contract
 
-The Challenge is semantically read-only: inspect and report, and leave source code, configuration, dependencies, version-control state, persistent data, and external systems as you found them. If the user asks to review and then implement, state the Decision first, then implement as a separate phase.
+The Challenge is semantically read-only: inspect and report, and leave source code, configuration, dependencies, version-control state, persistent data, and external systems as you found them. If the user asks to review and then implement, state the Decision first, then implement as a separate phase. Put disposable diagnostic artifacts where they can run, and remove only the ones this Challenge created before reporting.
 
 ## 1. Select the Candidate
 
@@ -30,7 +30,7 @@ Step 1 is complete when exactly one Candidate is selected. If equally plausible 
 
 ## 2. Establish the grounds
 
-Before you reread the Candidate's rationale, reconstruct the actual problem, the user's goal, and the hard constraints as the smallest set of observable conditions needed to judge Effectiveness. Ground material conditions in the user's statements or project evidence, and infer routine, low-impact gaps from context. Goals, hard constraints, and meaningful trade-offs remain the user's call.
+Before you reread the Candidate's rationale, reconstruct the actual problem, the user's goal, and the hard constraints as the smallest set of observable conditions needed to judge Effectiveness. Ground material conditions in the user's statements or project evidence, and infer immaterial gaps from context. Goals, hard constraints, and material trade-offs remain the user's call.
 
 Question the problem framing, holding to the requirements the user stated or the project implies.
 
@@ -77,13 +77,13 @@ Determine whether the Candidate's added complexity is necessary relative to the 
 
 Determine which material new liabilities adoption would create relative to the baseline, including regressions, coupling, operational burden, migration cost, security or reliability exposure, and lifecycle maintenance.
 
-Step 3 is complete when all three dimensions have an evidence-backed finding or explicit uncertainty and the strongest credible baseline has been compared with the Candidate.
+Step 3 is complete when all three dimensions have an evidence-backed finding or explicit uncertainty, every assumption whose failure would invalidate the Candidate has been tested or marked uncertain, and the strongest credible baseline has been compared with the Candidate.
 
 ## 4. Decide and recommend
 
 Choose exactly one Decision:
 
-- **Retain**: the Candidate survives the Challenge; no correction is justified and the baseline is not clearly better.
+- **Retain**: the Candidate survives the Challenge; no correction is justified.
 - **Simplify**: the Candidate can achieve the goal, but unnecessary machinery should be removed without changing the core solution path.
 - **Modify**: the main direction is sound, but material defects, omissions, or incorrect assumptions require correction.
 - **Replace**: the Candidate should not be adopted, and a concrete, credible alternative (a baseline or another option) should be used instead.
@@ -135,3 +135,5 @@ For a completed Challenge, use this shape:
 When Defer comes before the three dimensions can be assessed, return only the Decision and a concise revised recommendation that names the gap, plus the question.
 
 Keep each dimension to one concise paragraph by default, with each reference beside the claim it supports. A Retain recommendation explains why credible alternatives are not better. Report findings and evidence only.
+
+Step 4 is complete when every material finding from Step 3 is resolved in the revised recommendation or named as an uncertainty, and the output follows the shape for its branch.

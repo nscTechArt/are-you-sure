@@ -1,71 +1,69 @@
 ---
 name: are-you-sure
 description: Challenge a proposed software-engineering or technical-project solution before adopting it.
+disable-model-invocation: true
 ---
 
 # Are You Sure?
 
-Act as the dissenting second pass on an Agent's Candidate solution. Treat the Candidate as a hypothesis to falsify. The pass succeeds when it produces an evidence-backed Decision, including retaining the Candidate when it survives the challenge.
+Run the **Challenge**: a dissenting second pass on the Agent's Candidate solution. Treat the Candidate as a hypothesis to falsify. The Challenge succeeds when it produces an evidence-backed Decision, including Retain when the Candidate survives.
+
+Something is **material** when it could change the Decision.
 
 ## Operating contract
 
-The user's instructions take precedence over guidelines in this skill. If explicit user instructions conflict with this skill, follow the user's instructions.
+The Challenge is semantically read-only: inspect and report, and leave source code, configuration, dependencies, version-control state, persistent data, and external systems as you found them. If the user asks to review and then implement, state the Decision first, then implement as a separate phase.
 
-Infer the user's intent, review target, and routine scope details from the conversation and available project evidence. Bias toward completing the review. Before asking a question, finish authorized read-only investigation that could resolve it. Ask only when the remaining uncertainty is material: plausible answers would change the Decision or recommendation.
+## 1. Select the Candidate
 
-A Challenge pass is semantically read-only by default. Do not intentionally change source code, configuration, dependencies, version-control state, persistent data, or external systems while producing the review. If the user explicitly asks to review and then implement, finish the Challenge and state the Decision first, then carry out the authorized implementation as a separate phase.
+A **Candidate solution** (the Candidate) is the Agent's most recent complete, concrete proposal that claims to solve the user's goal. Brainstorming, problem analysis, and unselected alternatives are not Candidates. Incremental details belong to the current Candidate unless they form a new complete proposal.
 
-Keep the review proportional to the decision. Prefer concise findings and expand only when evidence or trade-offs require it.
-
-## 1. Select the review target
-
-A **Candidate solution** is the Agent's most recent complete, concrete proposal that claims to solve the user's goal. Brainstorming, problem analysis, and unselected alternatives are not Candidates. Treat incremental details as additions to the current Candidate unless they form a new complete proposal.
-
-When several proposals appear, infer the Review target from the strongest signal:
+When several proposals appear, select the Candidate by the strongest signal:
 
 1. the solution the user explicitly selected, endorsed, referred to, or asked to implement;
 2. the most recent complete proposal that clearly replaces an earlier one;
 3. a deliberately inseparable combination, reviewed as one Candidate.
 
-Do not ask the user to choose merely because multiple alternatives were mentioned. If independent Candidates remain equally plausible after using the available context, use **Defer** only when choosing among them could change the review.
+If the work is outside software engineering or technical-project scope, state the boundary and stop. This is the only exit without a Decision.
 
-If no concrete Candidate can be identified after inspecting the available context, use **Defer** and name the missing review target. If the work is outside software engineering or technical-project scope, state the boundary and stop without inventing a Decision.
+Step 1 is complete when exactly one Candidate is selected. If equally plausible Candidates remain and the choice is not material, select either; otherwise, go to Defer.
 
 ## 2. Establish the grounds
 
-Reconstruct the actual problem, the user's goal, and the hard constraints as the smallest set of observable conditions needed to judge Effectiveness. Ground material conditions in the user's statements or project evidence. Infer routine, low-impact gaps when context supports a reasonable interpretation; preserve the user's authority over goals, hard constraints, and meaningful trade-offs.
+Before you reread the Candidate's rationale, reconstruct the actual problem, the user's goal, and the hard constraints as the smallest set of observable conditions needed to judge Effectiveness. Ground material conditions in the user's statements or project evidence, and infer routine, low-impact gaps from context. Goals, hard constraints, and meaningful trade-offs remain the user's call.
 
-Challenge hidden assumptions and problem framing without manufacturing requirements that the user did not state and the project does not imply.
+Question the problem framing, holding to the requirements the user stated or the project implies.
 
-Gather the smallest body of evidence likely to change the Decision from relevant code, call sites, tests, configuration, documentation, or tools. Check history only when authorship, regression timing, or recency could change the outcome. Stop when further investigation is unlikely to change the Decision.
+Gather the smallest body of material evidence from relevant code, call sites, tests, configuration, documentation, or tools. Seek falsifying evidence before supporting evidence. Check history only when authorship, regression timing, or recency is material. Attach the smallest practical reference or reproduction to each non-obvious material finding.
 
 ### Verification
 
-Use the smallest bounded verification appropriate to the Candidate and its risk.
+Use the smallest verification that settles a material question.
 
-- Safe, local, non-networked diagnostics, existing tests, linters, builds, or reproductions may run without extra approval when proportionate and when they do not intentionally modify persistent project state.
-- Prefer existing checks and small reproductions. Do not create tests merely to mirror a reversible, low-impact implementation detail.
-- Once sufficient checks pass, broaden or repeat verification only when new changes, failures, unresolved concerns, or the Candidate's risk justify it.
-- Long-running, destructive, network-dependent, expensive, or safety-unknown checks require explicit authorization only when they are necessary to decide. Otherwise, do not block on them.
-- Keep disposable diagnostic artifacts isolated when possible and clean up only artifacts known to come from this pass.
+- Existing tests, linters, builds, diagnostics, or reproductions may run without extra approval when they are safe, local, non-networked, and not expected to modify tracked files or persistent data.
+- Prefer existing checks and small reproductions; write a new test only when it checks material behavior.
+- After sufficient checks pass, broaden or repeat verification only when new changes, failures, unresolved concerns, or the Candidate's risk justify it.
+- Run long-running, destructive, network-dependent, expensive, or safety-unknown checks only when the Decision needs them, and only with explicit authorization. If such a check is needed but not authorized, record a material uncertainty. Otherwise, skip it.
 
-If independent subagents are available, use one bounded parallel evidence or counterexample task only when it can materially improve a non-trivial review or reduce anchoring. Do not delegate routine reviews or duplicate work.
+If independent subagents are available, use at most one bounded counterexample task, and only for a non-trivial review where it could surface material evidence or reduce anchoring.
 
-Attach the smallest practical reference or reproduction to each non-obvious finding that can change the recommendation. Label unsupported inferences as uncertainties.
+Step 2 is complete when every material claim has evidence or an explicit uncertainty, and further investigation is unlikely to surface anything material.
 
-If a material uncertainty remains after available evidence is exhausted, choose **Defer**, name exactly what evidence, target, constraint, or user trade-off is missing, and explain how it could change the outcome. If the user can resolve it, ask one focused question at the end. Do not ask non-blocking questions.
+## 3. Test the Candidate
 
-## 3. Run the challenge
+Assess all three dimensions. Report each material finding once, under its primary effect:
 
-Assess all three dimensions. Fully report only material findings that can change the Decision. When no material defect is found, name the decisive evidence supporting that conclusion.
+- **Effectiveness**: the goal or a hard constraint fails.
+- **Simplicity**: extra machinery is unnecessary.
+- **Consequences**: adoption creates a new material liability.
 
-Classify each finding once by its primary effect: **Effectiveness** if the goal or a hard constraint fails; **Simplicity** if extra machinery is unnecessary; **Consequences** if adoption creates a new material liability.
+When a dimension has no material defect, name the evidence that supports that conclusion.
 
 ### Baseline
 
-Use current behavior or implementation as the default baseline. If it is not clearly sufficient, search only as far as needed through deliberate deferral, an existing project capability, a standard-library or native-platform capability, an already-installed dependency, and minimal custom machinery. Skip inapplicable options.
+Use current behavior or implementation as the default baseline. If it is not clearly sufficient, search only as far as needed through deliberate deferral, an existing project capability, a standard-library or native-platform capability, an already-installed dependency, and minimal custom machinery.
 
-A baseline is credible only when evidence shows it can satisfy the goal and hard constraints. Among credible baselines, prefer the one with the lowest necessary complexity. Deliberate deferral is credible only when its rationale and cost are explicit. Do not invent a baseline merely to complete the comparison.
+An option is credible only when evidence shows it can satisfy the goal and hard constraints. Among credible baselines, prefer the one with the lowest necessary complexity. Deliberate deferral is credible only when its rationale and cost are explicit.
 
 ### Effectiveness
 
@@ -77,24 +75,38 @@ Determine whether the Candidate's added complexity is necessary relative to the 
 
 ### Consequences
 
-Determine which material new liabilities adoption would create relative to the baseline, including regressions, coupling, operational burden, migration cost, security or reliability exposure, and lifecycle maintenance that bear on the Decision.
+Determine which material new liabilities adoption would create relative to the baseline, including regressions, coupling, operational burden, migration cost, security or reliability exposure, and lifecycle maintenance.
 
-The Challenge is complete when all three dimensions have an evidence-backed finding or explicit uncertainty and the strongest credible baseline has been compared with the Candidate.
+Step 3 is complete when all three dimensions have an evidence-backed finding or explicit uncertainty and the strongest credible baseline has been compared with the Candidate.
 
 ## 4. Decide and recommend
 
 Choose exactly one Decision:
 
-- **Retain**: the Candidate survives the challenge; no material change is justified and the baseline is not clearly better.
+- **Retain**: the Candidate survives the Challenge; no correction is justified and the baseline is not clearly better.
 - **Simplify**: the Candidate can achieve the goal, but unnecessary machinery should be removed without changing the core solution path.
 - **Modify**: the main direction is sound, but material defects, omissions, or incorrect assumptions require correction.
-- **Replace**: the Candidate should not be adopted and a concrete, viable alternative should be used instead.
-- **Reject**: the Candidate should not proceed and no concrete replacement is currently justified.
-- **Defer**: named evidence, a review target, a constraint, or a user trade-off that could change the outcome remains unavailable after available investigation is exhausted.
+- **Replace**: the Candidate should not be adopted, and a concrete, credible alternative (a baseline or another option) should be used instead.
+- **Reject**: the Candidate should not proceed and no concrete, credible replacement exists.
+- **Defer**: the Candidate, or a material fact, constraint, or user trade-off, is still missing.
 
-Use the user's language for headings, findings, and recommendations. Include the canonical English Decision name in parentheses when useful, for example `修改（Modify）`.
+When both Simplify and Modify apply, choose Modify and include the simplification in the revised recommendation.
 
-For a completed Challenge, use this review shape:
+### Defer and questions
+
+Complete the review from the conversation and project evidence whenever you can, and finish the read-only investigation that could close a gap before you treat it as material. Defer only in these cases:
+
+- No concrete Candidate can be identified: name the missing Candidate.
+- Independent Candidates remain equally plausible and the choice among them is material: name the choice.
+- A material uncertainty remains: name exactly what evidence, constraint, or user trade-off is missing, and explain how it could change the Decision.
+
+When the user can close the gap, end with one focused question. When the user answers, resume the Challenge with the new information.
+
+### Output
+
+Localize headings and findings to the user's language, and keep the canonical English Decision name in parentheses, for example `修改（Modify）`.
+
+For a completed Challenge, use this shape:
 
 ```markdown
 ## <localized review decision> (Decision)
@@ -105,23 +117,21 @@ For a completed Challenge, use this review shape:
 
 ### <localized effectiveness>
 
-<finding and decisive evidence>
+<finding and its evidence>
 
 ### <localized simplicity>
 
-<finding, baseline comparison, and decisive evidence>
+<finding, baseline comparison, and its evidence>
 
 ### <localized consequences>
 
-<finding and decisive evidence>
+<finding and its evidence>
 
 ## <localized revised recommendation>
 
 <self-contained, actionable recommendation>
 ```
 
-If **Defer** occurs before the three challenge dimensions can be meaningfully assessed, do not fabricate empty findings. Return only the Decision and a concise revised recommendation naming the blocker, plus one focused question when the user can resolve it.
+When Defer comes before the three dimensions can be assessed, return only the Decision and a concise revised recommendation that names the gap, plus the question.
 
-A Retain recommendation explains why credible alternatives are not better. A Defer recommendation explains how the missing information could change the outcome. Default to one concise paragraph per challenge dimension, integrate references with the claims they support, and do not repeat the same finding across dimensions. Report findings and evidence, not a private reasoning trace or transcript of tool use.
-
-If the user explicitly requested implementation after the review, complete the review first and then carry out that authorized work separately.
+Keep each dimension to one concise paragraph by default, with each reference beside the claim it supports. A Retain recommendation explains why credible alternatives are not better. Report findings and evidence only.

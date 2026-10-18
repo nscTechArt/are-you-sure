@@ -75,23 +75,34 @@ npx skills add nscTechArt/are-you-sure
 
 克隆或下载本仓库，再复制到 Agent 的 skills 目录，例如 `~/.agents/skills/are-you-sure`、`~/.claude/skills/are-you-sure` 或 `.cursor/skills/are-you-sure`。入口文件为 `SKILL.md`。
 
+**选项 D：claude.ai 上传或 Skills API**
+
+claude.ai 和 Skills API 只接受 [Agent Skills](https://agentskills.io) 规范中的 frontmatter 字段。上传前请删除 `SKILL.md` 中的 `disable-model-invocation: true` 这一行，否则上传会报错 `Unexpected key(s) in SKILL.md frontmatter`。这些渠道没有任何设置可以阻止模型自行调用该 skill。
+
 安装后，请新建一个 Agent 任务，让 skill 目录重新加载。
 
 ## 使用
 
+### 调用方式
+
+这个 skill 只在你明确调用时运行。Agent 不会自行启动它；在 Claude Code 中，"run are-you-sure" 这类自然语言请求也不会启动它。
+
+| 工具 | 命令 |
+| --- | --- |
+| Claude Code、Cursor | `/are-you-sure` |
+| Codex | `$are-you-sure` |
+
 ### 示例 Prompt
 
 ```text
-Use $are-you-sure to challenge your most recent technical recommendation.
+/are-you-sure
 ```
 
 ```text
-Before we implement that plan, run are-you-sure on it.
+/are-you-sure then implement the revised recommendation
 ```
 
-```text
-Run are-you-sure on that plan, then implement the revised recommendation.
-```
+在 Codex 中，把 `/` 换成 `$`。
 
 ### 何时使用
 
@@ -102,6 +113,7 @@ Run are-you-sure on that plan, then implement the revised recommendation.
 ### 不适用的情况
 
 - 还没有具体方案，只希望进行开放式探索。
+- 方案不是 Agent 提出的，例如你自己的方案或某个 PR。这个 skill 只审查 Agent 自己提出的方案。
 - 工作不属于软件工程或技术项目。
 - 只希望执行，不希望重新审查方案本身。
 

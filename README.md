@@ -75,23 +75,34 @@ npx skills add nscTechArt/are-you-sure
 
 Clone or download this repository and copy it into your agent's skills directory, for example `~/.agents/skills/are-you-sure`, `~/.claude/skills/are-you-sure`, or `.cursor/skills/are-you-sure`. The entrypoint is `SKILL.md`.
 
+**Option D: claude.ai upload or Skills API**
+
+claude.ai and the Skills API accept only the frontmatter fields in the [Agent Skills](https://agentskills.io) spec. Delete the `disable-model-invocation: true` line from `SKILL.md` before you upload it; otherwise the upload fails with `Unexpected key(s) in SKILL.md frontmatter`. These surfaces have no setting that stops the model from invoking the skill on its own.
+
 After installation, start a new agent task so the skill directory reloads.
 
 ## Usage
 
+### Invocation
+
+The skill runs only when you invoke it explicitly. The agent does not start it on its own, and in Claude Code a plain-language request such as "run are-you-sure" does not start it.
+
+| Tool | Command |
+| --- | --- |
+| Claude Code, Cursor | `/are-you-sure` |
+| Codex | `$are-you-sure` |
+
 ### Example prompts
 
 ```text
-Use $are-you-sure to challenge your most recent technical recommendation.
+/are-you-sure
 ```
 
 ```text
-Before we implement that plan, run are-you-sure on it.
+/are-you-sure then implement the revised recommendation
 ```
 
-```text
-Run are-you-sure on that plan, then implement the revised recommendation.
-```
+In Codex, replace `/` with `$`.
 
 ### When to use it
 
@@ -102,6 +113,7 @@ Run are-you-sure on that plan, then implement the revised recommendation.
 ### When not to use it
 
 - There is no concrete proposal yet and you only want open-ended exploration.
+- The proposal did not come from the agent, for example your own plan or a PR. The skill reviews only the agent's own proposals.
 - The work is outside software engineering or technical-project scope.
 - You only want execution and do not want the solution challenged.
 
